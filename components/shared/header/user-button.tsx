@@ -55,6 +55,28 @@ export async function UserButton() {
                             </div>
                         </div>
                     </DropdownMenuLabel>
+                    
+                    <DropdownMenuItem>
+                        <Link href="/user/orders" className="w-full">
+                            Your Orders
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <Link href="/user/profile" className="w-full">
+                            Your Profile
+                        </Link>
+                    </DropdownMenuItem>
+
+                    {
+                        session?.user?.role === 'admin' && (
+                            <DropdownMenuItem>
+                                <Link href="/admin/overview" className="w-full">
+                                    Admin
+                                </Link>
+                            </DropdownMenuItem>
+                        )
+                    }
+
                     <DropdownMenuItem className="p-0 mb-1">
                         <form action={ signOutUser} className="w-full">
                             <Button className="w-full py-4 px-2 h-4 justify-start" variant="ghost">

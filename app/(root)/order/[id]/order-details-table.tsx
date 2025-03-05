@@ -15,12 +15,14 @@ import { Order } from '@/types';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer  } from "@paypal/react-paypal-js"
-import { createPayPalOrder, approvePayPalOrder } from '@/lib/actions/order.actions';
+import { createPayPalOrder, approvePayPalOrder, updateOrderToPaidCOD, deliverOrder } from '@/lib/actions/order.actions';
+import { useTransition } from 'react';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 
 //TODO: PayPal Client ID givin as a props security issue?
-export function OrderDetailsTable({ order, paypalClientId }: { order: Order, paypalClientId: string }) {
+export function OrderDetailsTable({ order, paypalClientId, isAdmin }: { order: Order, paypalClientId: string, isAdmin: boolean }) {
   const {
     id,
     shippingAddress,
@@ -36,6 +38,10 @@ export function OrderDetailsTable({ order, paypalClientId }: { order: Order, pay
     deliveredAt,
   } = order;
   const { toast } = useToast();
+
+  console.log('IsPaid: ', isPaid);
+  console.log("Payment Method: ", paymentMethod);
+
 
   const PrintLoadingState = () => {
     const [{ isPending, isRejected  }] = usePayPalScriptReducer();
@@ -73,10 +79,47 @@ export function OrderDetailsTable({ order, paypalClientId }: { order: Order, pay
 
   }
 
+  const MarkAsPaidButton = () => {
+    const [isPending, startTransition] = useTransition();
+    const { toast } = useToast();
+
+
+    return (
+      <Button type='button' disabled={isPending} onClick={() => startTransition(async () => {
+        const res = await updateOrderToPaidCOD(id);
+        toast({
+          variant: res.success ? 'default' : 'destructive',
+          description: res.message
+        })
+      })}>
+        { isPending ? "Processing..." : "Mark as Paid"}
+
+      </Button>
+    )
+  }
+
+  const MarkAsDeliveredButton = () => {
+    const [isPending, startTransition] = useTransition();
+    const { toast } = useToast();
+
+    return (
+      <Button type='button' disabled={isPending} onClick={() => startTransition(async () => {
+        const res = await deliverOrder(id);
+        toast({
+          variant: res.success ? 'default' : 'destructive',
+          description: res.message
+        })
+      })}>
+        { isPending ? "Processing..." : "Mark as Delivered"}
+
+      </Button>
+    )
+  }
+
   return (
     <>
       <h1 className='py-4 text-2xl'>Order {formatId(id)}</h1>
-      <div className='gird md:grid-cols-3 md:gap-5'>
+      <div className='grid md:grid-cols-3 md:gap-5'>
         <div className='col-span-2 space-4-y overflow-x-auto'>
           <Card>
             <CardContent className='p-4 gap-4'>
@@ -177,6 +220,17 @@ export function OrderDetailsTable({ order, paypalClientId }: { order: Order, pay
                   </PayPalScriptProvider>
                 </div>
                )}
+               {/* Cache On Delivery */}
+               {
+                isAdmin && !isPaid && paymentMethod === "CashOnDelivery" && (
+                  <MarkAsPaidButton />
+                )
+               }
+               {
+                isAdmin && isPaid && !isDelivered  && (
+                  <MarkAsDeliveredButton />
+                )
+               }
             </CardContent>
           </Card>
         </div>
