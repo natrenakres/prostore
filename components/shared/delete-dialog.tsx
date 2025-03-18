@@ -45,7 +45,7 @@ export function DeleteDialog( { id, action} :  { id: string, action: (id: string
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <Button variant={'destructive'} size="sm" disabled={isPending} onClick={()=>handleDeleteClick}>
+                    <Button variant={'destructive'} size="sm" disabled={isPending} onClick={handleDeleteClick}>
                         {isPending ? "Deleting..." : "Delete"}
                     </Button>
                     

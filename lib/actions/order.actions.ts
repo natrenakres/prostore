@@ -65,8 +65,6 @@ export async function updateOrderToPaidCOD(orderId: string) {
 
 // Delete order
 export async function deleteOrder(id: string ){
-
-
     try {
         await prisma.order.delete({
             where: {
@@ -91,8 +89,19 @@ export async function deleteOrder(id: string ){
 }
 
 // Get All orders
-export async function getAllOrders({ limit = PAGE_SIZE, page } : { limit?: number, page?: number | null }) {
+export async function getAllOrders({ limit = PAGE_SIZE, page, query } : { limit?: number, page?: number | null, query: string }) {
+    const queryFilter: Prisma.OrderWhereInput = query && query !== 'all' ? {
+        user: {
+            name:  {
+                contains: query,
+                mode: 'insensitive'
+            } as Prisma.StringFilter
+        }
+    }: {};
     const data = await prisma.order.findMany({
+        where: {
+            ...queryFilter
+        },
         orderBy: {
             createdAt: 'desc'
         },

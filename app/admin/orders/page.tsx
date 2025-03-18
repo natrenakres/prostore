@@ -15,26 +15,41 @@ export const metadata: Metadata = {
 }
 
 
-export default async function OrdersPage(props: { searcParams: Promise<{page: string}>}) {
-    const params    =  await props.searcParams;
+export default async function OrdersPage(props: { searchParams: Promise<{page: string, query: string}>}) {
+    const searchParams = await props.searchParams;
+
+    const page = Number(searchParams.page) || 1;
+    const searchText = searchParams.query || '';
 
     await requiredAdmin();
 
     const {data, totalPages} = await getAllOrders({
-        page: Number(params?.page),
+        page: Number(page),
+        query: searchText
     });
 
     return (
         <div className="space-y-2">
-            <h2 className="h2-bold">
-                Orders
-            </h2>
+            <div className="flex items-center gap-3">
+                    <h1 className="h2-bold">Orders</h1>
+                    { searchText && (
+                        <div>
+                            Filtered by <i>&quot;{searchText}&quot;</i> {' '}
+                            <Link href="/admin/orders">
+                                <Button variant="outline" size="sm">Remove Filter</Button>
+                            </Link>
+                        </div>
+                     )
+                    }
+
+                </div>
             <div className="overflow-x-auto"> 
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>ID</TableHead>
                             <TableHead>DATE</TableHead>
+                            <TableHead>BUYER</TableHead>
                             <TableHead>TOTAL</TableHead>
                             <TableHead>PAID</TableHead>
                             <TableHead>DELIVERED</TableHead>
@@ -47,6 +62,7 @@ export default async function OrdersPage(props: { searcParams: Promise<{page: st
                                 <TableRow key={order.id}>
                                     <TableCell>{formatId(order.id)}</TableCell>
                                     <TableCell>{formatDateTime(order.createdAt).dateTime}</TableCell>
+                                    <TableCell>{order.user.name}</TableCell>
                                     <TableCell>{formatCurrency(order?.totalPrice)}</TableCell>
                                     <TableCell>{order.isPaid && order.paidAt ? formatDateTime(order.paidAt).dateTime : 'Not Paid '}</TableCell>
                                     <TableCell>{order.isDelivered && order.deliveredAt ? formatDateTime(order.deliveredAt).dateTime : 'Not Delivered'}</TableCell>
@@ -64,7 +80,7 @@ export default async function OrdersPage(props: { searcParams: Promise<{page: st
                     </TableBody>
                 </Table>
                 {
-                    totalPages > 1 && <Pagination page={Number(params?.page) || 1} totalPages={totalPages} />
+                    totalPages > 1 && <Pagination page={Number(page) || 1} totalPages={totalPages} />
                 }
             </div>
         </div>

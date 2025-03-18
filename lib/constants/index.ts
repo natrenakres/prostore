@@ -20,3 +20,27 @@ export const PAYMENT_METHODS =  process.env.PAYMENT_METHODS ? process.env.PAYMEN
 export const DEFAULT_PAYMENT_METHOD = process.env.DEFAULT_PAYMENT_METHOD ? process.env.DEFAULT_PAYMENT_METHOD : 'PayPal';
 
 export const PAGE_SIZE = 10;
+
+export const productDefaultValues = {
+    name: '',
+    slug: '',
+    category: '',
+    images: [],
+    brand: '',
+    description: '',
+    price:  0,
+    stock: 0,
+    rating: 0,
+    numReviews: 0,
+    isFeatured: false,
+    banner: null, 
+}
+
+export const USER_ROLES = process.env.USER_ROLES ? process.env.USER_ROLES.split(', ') : ['admin', 'user'];
+
+export const reviewFormsDefaultValues= {
+    title: '',
+    description: '',
+    rating: 0
+
+}
