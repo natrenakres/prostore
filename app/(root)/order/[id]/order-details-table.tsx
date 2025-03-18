@@ -19,10 +19,11 @@ import { createPayPalOrder, approvePayPalOrder, updateOrderToPaidCOD, deliverOrd
 import { useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { StripePayment } from './stripe-payment';
 
 
 //TODO: PayPal Client ID givin as a props security issue?
-export function OrderDetailsTable({ order, paypalClientId, isAdmin }: { order: Order, paypalClientId: string, isAdmin: boolean }) {
+export function OrderDetailsTable({ order, paypalClientId, isAdmin, stripeClientSecret }: { order: Order, paypalClientId: string, isAdmin: boolean, stripeClientSecret: string | null }) {
   const {
     id,
     shippingAddress,
@@ -226,6 +227,13 @@ export function OrderDetailsTable({ order, paypalClientId, isAdmin }: { order: O
                   <MarkAsPaidButton />
                 )
                }
+               {/* Stripe Payment */}
+               {
+                 !isPaid && paymentMethod === "Stripe" && stripeClientSecret && (
+                  <StripePayment priceInCents={Number(order.totalPrice)*100} orderId={order.id} clientSecret={stripeClientSecret} />
+                 )
+               }
+
                {
                 isAdmin && isPaid && !isDelivered  && (
                   <MarkAsDeliveredButton />
